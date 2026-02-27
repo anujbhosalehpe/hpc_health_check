@@ -145,7 +145,16 @@
   gather_facts: false
   vars:
     output_dir: "/tmp/hpcm_outputs/compute"
+
   tasks:
+
+    - name: Create compute output directory (localhost)
+      delegate_to: localhost
+      run_once: true
+      file:
+        path: "{{ output_dir }}"
+        state: directory
+        mode: '0755'
 
     - name: Collect Compute Local Data
       shell: |
@@ -204,8 +213,19 @@
           echo "===== Mellanox PCI Devices ====="
           lspci | grep -i Mellanox || true
 
+          echo "===== Mellanox Driver Details ====="
+          for i in $(ls /sys/class/net); do
+            ethtool -i $i 2>/dev/null | grep -i mlx && ethtool -i $i
+          done || true
+
+          echo "===== Mellanox mlx5_core Driver Info ====="
+          modinfo mlx5_core | grep -E 'filename|version|description' || true
+
+          echo "===== OFED Version ====="
+          ofed_info -s 2>/dev/null || true
+
           echo "===== Lustre Client Version ====="
-          cat /proc/fs/lustre/version 2>/dev/null || modinfo lustre | grep version || true
+          cat /proc/fs/lustre/version 2>/dev/null || true
 
           echo "===== Time Sync (timedatectl) ====="
           timedatectl || true
@@ -222,19 +242,8 @@
           echo "===== DNS Configuration ====="
           cat /etc/resolv.conf || true
 
-          echo "===== DNS Test (nslookup google.com) ====="
+          echo "===== DNS Test ====="
           nslookup google.com || true
-
-          echo "===== Mellanox Driver Details ====="
-          for i in $(ls /sys/class/net); do
-            ethtool -i $i 2>/dev/null | grep -i mlx && ethtool -i $i
-          done || true
-
-          echo "===== Mellanox mlx5_core Driver Info ====="
-          modinfo mlx5_core | grep -E 'filename|version|description' || true
-
-          echo "===== OFED Version ====="
-          ofed_info -s 2>/dev/null || true
 
         } 2>&1
       register: compute_local
@@ -244,7 +253,7 @@
       delegate_to: localhost
       copy:
         content: "{{ compute_local.stdout }}"
-        dest: "{{ output_dir }}/compute_local_health.txt"
+        dest: "{{ output_dir }}/{{ inventory_hostname }}_health.txt"
 ########################################
 # COMPUTE – CM INVENTORY & MONITORING (gpu001)
 ########################################
