@@ -109,10 +109,27 @@
     ########################################
     # CM INFO GATHER (IMPORTANT – LAST)
     ########################################
-    - name: Run cm-info-gather
-      shell: cm-info-gather
-      register: cm_info
-      changed_when: false
+    # - name: Run cm-info-gather
+    #   shell: cm-info-gather
+    #   register: cm_info
+    #   changed_when: false
+
+    # - name: Save cm-info-gather log
+    #   delegate_to: localhost
+    #   copy:
+    #     content: "{{ cm_info.stdout }}"
+    #     dest: "{{ output_dir }}/cm-info-gather.log"
+
+    # - name: Find cm-info-gather archive
+    #   shell: ls -t /var/tmp/cm-info-gather-*.tar.bz2 | head -1
+    #   register: cm_info_tar
+    #   changed_when: false
+
+    # - name: Copy cm-info-gather archive to output directory
+    #   fetch:
+    #     src: "{{ cm_info_tar.stdout }}"
+    #     dest: "{{ output_dir }}/"
+    #     flat: yes
 
 ########################################
 # COMPUTE NODE – LOCAL HEALTH (gpu001)
