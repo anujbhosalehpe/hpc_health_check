@@ -45,6 +45,9 @@
 
           echo "===== cmdb.service ====="
           systemctl status cmdb.service || true
+          
+          echo "===== cmdb.service ====="
+          systemctl status dhcpd.service || true
 
           echo "===== clmgr-health ====="
           systemctl status clmgr-health || true
@@ -93,6 +96,12 @@
 
           echo "===== sinfo -N ====="
           sinfo -N || true
+
+          echo "===== Disks (lsblk) ====="
+          lsblk || true
+          
+          echo "===== Mounts (df -Th) ====="
+          df -Th || true
         } 2>&1
       register: admin_output
       changed_when: false
@@ -137,13 +146,6 @@
   vars:
     output_dir: "/tmp/hpcm_outputs/compute"
   tasks:
-
-    - name: Create compute output directory
-      delegate_to: localhost
-      file:
-        path: "{{ output_dir }}"
-        state: directory
-        mode: '0755'
 
     - name: Collect Compute Local Data
       shell: |
@@ -204,6 +206,35 @@
 
           echo "===== Lustre Client Version ====="
           cat /proc/fs/lustre/version 2>/dev/null || modinfo lustre | grep version || true
+
+          echo "===== Time Sync (timedatectl) ====="
+          timedatectl || true
+
+          echo "===== Chrony Service ====="
+          systemctl status chronyd | grep Active || true
+
+          echo "===== Chrony Sources ====="
+          chronyc sources || true
+
+          echo "===== Chrony Tracking ====="
+          chronyc tracking || true
+
+          echo "===== DNS Configuration ====="
+          cat /etc/resolv.conf || true
+
+          echo "===== DNS Test (nslookup google.com) ====="
+          nslookup google.com || true
+
+          echo "===== Mellanox Driver Details ====="
+          for i in $(ls /sys/class/net); do
+            ethtool -i $i 2>/dev/null | grep -i mlx && ethtool -i $i
+          done || true
+
+          echo "===== Mellanox mlx5_core Driver Info ====="
+          modinfo mlx5_core | grep -E 'filename|version|description' || true
+
+          echo "===== OFED Version ====="
+          ofed_info -s 2>/dev/null || true
 
         } 2>&1
       register: compute_local
