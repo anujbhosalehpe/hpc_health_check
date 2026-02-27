@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REPO_URL="git@github.com:yourrepo/healthcheck.git"
+REPO_URL="git@github.com:anujbhosalehpe/hpc_health_check.git"
 WORKDIR="/tmp/healthcheck_run"
 BRANCH="main"
 
