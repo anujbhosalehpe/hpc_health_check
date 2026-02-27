@@ -120,25 +120,6 @@
         content: "{{ cm_info.stdout }}"
         dest: "{{ output_dir }}/cm-info-gather.log"
 
-    - name: Find cm-info-gather archive safely
-      find:
-        paths: /var/tmp
-        patterns: "cm-info-gather-*.tar.bz2"
-      register: cm_info_files
-
-    - name: Copy cm-info-gather archive to output directory
-      fetch:
-        src: "{{ cm_info_files.files | sort(attribute='mtime', reverse=True) | map(attribute='path') | list | first }}"
-        dest: "{{ output_dir }}/"
-        flat: yes
-      when: cm_info_files.matched > 0
-
-    - name: Copy cm-info-gather archive to output directory
-      fetch:
-        src: "{{ cm_info_tar.stdout }}"
-        dest: "{{ output_dir }}/"
-        flat: yes
-
 ########################################
 # COMPUTE NODE – LOCAL HEALTH (gpu001)
 ########################################
