@@ -114,12 +114,6 @@
       register: cm_info
       changed_when: false
 
-    - name: Save cm-info-gather log
-      delegate_to: localhost
-      copy:
-        content: "{{ cm_info.stdout }}"
-        dest: "{{ output_dir }}/cm-info-gather.log"
-
 ########################################
 # COMPUTE NODE – LOCAL HEALTH (gpu001)
 ########################################
