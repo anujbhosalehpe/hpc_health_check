@@ -204,9 +204,6 @@
           echo "===== Prometheus Service ====="
           systemctl status prometheus | grep Active || true
 
-          echo "===== HPCM / CM Services ====="
-          cm status || true
-
           echo "===== InfiniBand Status ====="
           ibstat || true
 
