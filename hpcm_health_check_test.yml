@@ -64,9 +64,6 @@
           echo "===== CM Image ====="
           cm image show || true
 
-          echo "===== CM Inventory (REYNOLDS) ====="
-          cm inventory -e -n hpcmadmin.rps.local || true
-
           echo "===== CM Monitoring Alerting ====="
           cm monitoring alerting status || true
 
@@ -132,9 +129,9 @@
     #     flat: yes
 
 ########################################
-# COMPUTE NODE – LOCAL HEALTH (gpu001)
+# HPC cluster node
 ########################################
-- name: Collect Compute Node Local Health
+- name: Collect HPC cluster node
   hosts: compute
   gather_facts: false
   vars:
@@ -153,30 +150,24 @@
         set +e
         {
           echo "================ COMPUTE NODE ================="
-          
+
           echo "===== Hostname ====="
           hostname
-          
+
           echo "===== OS Release ====="
           cat /etc/redhat-release || true
 
           echo "===== Kernel ====="
           uname -r || true
 
-          echo "===== IP Addresses (ip a) ====="
-          ip a || true
-
-          echo "===== slurmd status ====="
-          systemctl status slurmd | grep Active || true
-
-          echo "===== Kernel ====="
-          uname -r || true
-
-          echo "===== Memory ====="
-          free -h || true
+          echo "===== IP Addresses (ip -br a) ====="
+          ip -br a || true
 
           echo "===== IP Addresses (hostname -I) ====="
           hostname -I || true
+
+          echo "===== Memory ====="
+          free -h || true
 
           echo "===== Disks (lsblk) ====="
           lsblk || true
@@ -186,6 +177,34 @@
 
           echo "===== Hardware ====="
           dmidecode -t system || true
+
+          echo "===== NVIDIA GPU Details ====="
+          nvidia-smi || true
+
+          echo "===== CUDA Driver Version ====="
+          nvidia-smi | grep -i cuda || true
+
+          echo "===== SLURM Service ====="
+          systemctl status slurmd | grep Active || true
+
+          echo "===== Grafana Service ====="
+          systemctl status grafana-server | grep Active || true
+
+          echo "===== Prometheus Service ====="
+          systemctl status prometheus | grep Active || true
+
+          echo "===== HPCM / CM Services ====="
+          cm status || true
+
+          echo "===== InfiniBand Status ====="
+          ibstat || true
+
+          echo "===== Mellanox PCI Devices ====="
+          lspci | grep -i Mellanox || true
+
+          echo "===== Lustre Client Version ====="
+          cat /proc/fs/lustre/version 2>/dev/null || modinfo lustre | grep version || true
+
         } 2>&1
       register: compute_local
       changed_when: false
@@ -195,7 +214,6 @@
       copy:
         content: "{{ compute_local.stdout }}"
         dest: "{{ output_dir }}/compute_local_health.txt"
-
 ########################################
 # COMPUTE – CM INVENTORY & MONITORING (gpu001)
 ########################################
