@@ -107,7 +107,7 @@
         dest: "{{ output_dir }}/admin_vm_health.txt"
 
     ########################################
-    # CM INFO GATHER (IMPORTANT – LAST)
+    ## CM INFO GATHER (IMPORTANT – LAST)
     ########################################
     # - name: Run cm-info-gather
     #   shell: cm-info-gather
